@@ -1,7 +1,13 @@
 const { app, BrowserWindow, Menu, ipcMain } = require('electron')
+const path = require('path'); // Import path module
 
-/*
- * Create the main window
+let appWindow;
+let twitchInstances = []; // Array to store all instances of twitch renderers
+
+/**
+ * Creates a new Twitch window.
+ * @function createTwitchWindow
+ * @returns {void}
  */
 function createTwitchWindow() {
     let newRender;
@@ -19,27 +25,81 @@ function createTwitchWindow() {
         },
     }
     newRender = new BrowserWindow(BrowserWindowOptions)
-
-    // Charger le site OpenAI Chat
-    newRender.loadURL('https://www.twitch.tv/')
+    twitchInstances[newRender.id] = newRender;   // Store the id instance
+    newRender.loadURL('https://www.perdu.com/')
+    // newRender.loadURL('https://www.twitch.tv/')
 }
+
+/**
+ * Function to get all twitch instances
+ * @function getTwitchInstances
+ * @returns {Array.<BrowserWindow>}
+ */
+function getTwitchInstances() {
+    console.log('instance ID', Object.keys(twitchInstances))
+    return Object.keys(twitchInstances).map(id => parseInt(id))
+}
+
+/**
+ * Creates a new App window.
+ * @function createAppWindow
+ * @returns {void}
+ */
+function createAppWindow() {
+    if (appWindow) {
+        appWindow.focus();
+    } else {
+        appWindow = new BrowserWindow({
+            width: 600,
+            height: 900,
+            webPreferences: {
+                nodeIntegration: true,
+                preload: path.join(__dirname, 'modules/preload.js')
+            }
+        })
+        appWindow.loadFile('modules/index.html');
+        appWindow.on('closed', () => {
+            appWindow = null;
+        });
+    }
+}
+
+
+
+ipcMain.on('create-twitch-window', (event, arg) => {
+  createTwitchWindow();
+});
+
+ipcMain.handle('get-list-instances', (event) => {
+    return getTwitchInstances();
+});
+
 
 // Enable sandboxing application wise
 app.enableSandbox()
 
 // Create the main window when electron is ready
 app.whenReady().then(() => {
+
     // Création du menu
     const template = [
         {
             label: 'File',
+            /**
+             * Defines the submenu for the Menu item.
+             * @typedef {Object[]} Submenu
+             * @property {string} label - The label for the submenu item.
+             * @property {function} click - The function to be executed when the submenu item is clicked.
+             */
             submenu: [
+                // new window
                 {
                     label: 'New window',
                     click: () => {
                         createTwitchWindow()
                     },
                 },
+                // Mute / Unmute
                 {
                     label: 'Mute / Unmute',
                     click: () => {
@@ -57,8 +117,14 @@ app.whenReady().then(() => {
                             currentWindow.setTitle(currentWindow.getTitle().replace(' (muted)', ''))
                         }
                     }
+                },
+                {
+                    label: 'Open DevTools',
+                    click: () => {
+                        const currentWindow = BrowserWindow.getFocusedWindow();
+                        currentWindow.webContents.openDevTools();
+                    }
                 }
-                // Autres entrées de menu...
             ]
         },
     ]
@@ -67,10 +133,10 @@ app.whenReady().then(() => {
 
 
 
-    createTwitchWindow()
+    createAppWindow()
     // If application is running but no window is open create a new instance of the main window.
     app.on('activate', function () {
-        if (mainWindow === null) createTwitchWindow()
+        if (mainWindow === null) createAppWindow()
     })
 })
 
@@ -79,4 +145,3 @@ app.on('window-all-closed', function () {
     // On macOS it is common for applications and their menu bar to stay active until the user quits explicitly with Cmd + Q
     if (process.platform !== 'darwin') app.quit()
 })
-

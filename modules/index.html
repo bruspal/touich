@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+    <style>
+        body, html {
+            height: 100%;
+            background-color: #343a40;
+            color: #f8f9fa;
+        }
+
+        .title-part,
+        .buttton-part {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 33.33%;
+        }
+
+        .main-container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            max-width:500px;
+            margin: 0 auto;
+            background-color: #343a40;
+            color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container main-container">
+        <div class="title-part">
+            <h1>Touitch Manager</h1>
+        </div>
+        <div class="button-part">
+            <button onclick="window.eapi.createTwitchWindow()">Open new Twitch</button>
+            <button onclick="window.eapi.refreshInstances()">Refresh</button>
+        </div>
+        <div class="instanceList">
+
+        </div>
+    </div>
+</body>
+</html>
