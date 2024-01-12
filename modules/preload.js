@@ -7,7 +7,7 @@ function createButtonForEachInstance(instances) {
     Array.from(buttonContainer.childNodes).forEach(child => child.remove())
     instances.forEach((ins) => {
         let button = document.createElement('button')
-        button.innerHTML = 'Bring window '+ins
+        button.innerHTML = 'Bring window '+ins.name
         button.onclick = () => ipcRenderer.send('bring-twitch-window', ins)
         buttonContainer.appendChild(button);
         console.log(button)
