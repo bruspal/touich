@@ -1,9 +1,9 @@
-const { app, BrowserWindow, Menu } = require('electron')
+const { app, BrowserWindow, Menu, ipcMain } = require('electron')
 
 /*
  * Create the main window
  */
-function createWindow() {
+function createTwitchWindow() {
     let newRender;
     const iconPath = __dirname + '/assets/logo/twitch.png';
     const BrowserWindowOptions = {
@@ -37,7 +37,7 @@ app.whenReady().then(() => {
                 {
                     label: 'New window',
                     click: () => {
-                        createWindow()
+                        createTwitchWindow()
                     },
                 },
                 {
@@ -67,10 +67,10 @@ app.whenReady().then(() => {
 
 
 
-    createWindow()
+    createTwitchWindow()
     // If application is running but no window is open create a new instance of the main window.
     app.on('activate', function () {
-        if (mainWindow === null) createWindow()
+        if (mainWindow === null) createTwitchWindow()
     })
 })
 
