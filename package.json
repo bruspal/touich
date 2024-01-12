@@ -1,0 +1,37 @@
+{
+  "name": "twitchClient",
+  "version": "1.0.0",
+  "author": "Bruspal",
+  "license": "GPL v3.0",
+  "main": "app.js",
+  "devDependencies": {
+    "electron": "^29.0.0-alpha.5",
+    "electron-builder": "^24.9.1"
+  },
+  "scripts": {
+    "start": "electron app.js",
+    "build": "electron-builder"
+  },
+  "build": {
+    "appId": "net.bruspal.${name}",
+    "productName": "touitch",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "app.js",
+      "package.json",
+      "./assets/**/*"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "assets/logo/twitch.png"
+    }
+  }
+}
