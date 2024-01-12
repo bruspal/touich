@@ -26,8 +26,7 @@ function createTwitchWindow() {
     }
     newRender = new BrowserWindow(BrowserWindowOptions)
     twitchInstances[newRender.id] = newRender;   // Store the id instance
-    newRender.loadURL('https://www.perdu.com/')
-    // newRender.loadURL('https://www.twitch.tv/')
+    newRender.loadURL('https://www.twitch.tv/')
 }
 
 /**
@@ -36,8 +35,15 @@ function createTwitchWindow() {
  * @returns {string[]}
  */
 function getTwitchInstances() {
+    let t = []
     console.log('instance ID', Object.keys(twitchInstances))
-    return Object.keys(twitchInstances)
+    twitchInstances.forEach((ins, idx) => {
+        t.push({
+            id: idx,
+            name: ins.getTitle()
+        })
+    })
+    return t
 }
 
 /**
@@ -64,7 +70,22 @@ function createAppWindow() {
     }
 }
 
+function muteUnmute(windowInstance) {
+    // Toggle the muted state
+    const mutedState = isMutted(windowInstance)
+    windowInstance.webContents.setAudioMuted(!mutedState);
 
+    // Change window name
+    if (!mutedState) {
+        windowInstance.setTitle(windowInstance.getTitle() + ' (muted)')
+    } else {
+        windowInstance.setTitle(windowInstance.getTitle().replace(' (muted)', ''))
+    }
+}
+
+function isMutted(windowInstance) {
+    return windowInstance.webContents.isAudioMuted();
+}
 
 
 
@@ -105,17 +126,7 @@ app.whenReady().then(() => {
                     click: () => {
                         // Get the current window
                         const currentWindow = BrowserWindow.getFocusedWindow();
-
-                        // Toggle the muted state
-                        const mutedState = currentWindow.webContents.isAudioMuted();
-                        currentWindow.webContents.setAudioMuted(!mutedState);
-
-                        // Changement du titre de la fenêtre.
-                        if (!mutedState) {
-                            currentWindow.setTitle(currentWindow.getTitle() + ' (muted)')
-                        } else {
-                            currentWindow.setTitle(currentWindow.getTitle().replace(' (muted)', ''))
-                        }
+                        muteUnmute(currentWindow)
                     }
                 },
                 {
