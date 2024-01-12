@@ -1,14 +1,18 @@
 const {ipcRenderer, contextBridge} = require('electron');
 
-// function createButtonForEachInstance() {
-//     const instances = getTwitchInstances();
-//     instances.forEach((instance) => {
-//         let button = document.createElement('button');
-//         button.innerHTML = 'Bring window';
-//         button.onclick = () => ipcRenderer.send('bring-twitch-window', instance);
-//         document.body.appendChild(button);
-//     });
-// }
+function createButtonForEachInstance(instances) {
+    // get the button container
+    const buttonContainer= document.getElementById('buttonContainer')
+    // clean the container
+    Array.from(buttonContainer.childNodes).forEach(child => child.remove())
+    instances.forEach((ins) => {
+        let button = document.createElement('button')
+        button.innerHTML = 'Bring window '+ins
+        button.onclick = () => ipcRenderer.send('bring-twitch-window', ins)
+        buttonContainer.appendChild(button);
+        console.log(button)
+    });
+}
 
 contextBridge.exposeInMainWorld(
     "eapi",
@@ -17,17 +21,12 @@ contextBridge.exposeInMainWorld(
         refreshInstances: () => {
             ipcRenderer.invoke('get-list-instances')
                 .then((instances) => {
-                    console.log(instances)
-                    //instances.forEach((ins) => {
-                        /*
-                        let button = document.createElement('button');
-                        button.innerHTML = 'Bring window';
-                        button.onclick = () => ipcRenderer.send('bring-twitch-window', ins);
-                        document.body.appendChild(button);
-                         */
-                    //});
+                    console.log('preload', instances)
+                    createButtonForEachInstance(instances)
                 })
-                .catch((reason) => console.log(reason))
+                .catch((reason) => {
+                    console.log(reason)
+                })
         }
     }
 );

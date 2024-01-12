@@ -33,11 +33,11 @@ function createTwitchWindow() {
 /**
  * Function to get all twitch instances
  * @function getTwitchInstances
- * @returns {Array.<BrowserWindow>}
+ * @returns {string[]}
  */
 function getTwitchInstances() {
     console.log('instance ID', Object.keys(twitchInstances))
-    return Object.keys(twitchInstances).map(id => parseInt(id))
+    return Object.keys(twitchInstances)
 }
 
 /**
@@ -66,13 +66,6 @@ function createAppWindow() {
 
 
 
-ipcMain.on('create-twitch-window', (event, arg) => {
-  createTwitchWindow();
-});
-
-ipcMain.handle('get-list-instances', (event) => {
-    return getTwitchInstances();
-});
 
 
 // Enable sandboxing application wise
@@ -80,6 +73,13 @@ app.enableSandbox()
 
 // Create the main window when electron is ready
 app.whenReady().then(() => {
+    ipcMain.on('create-twitch-window', (event, arg) => {
+        createTwitchWindow();
+    });
+
+    ipcMain.handle('get-list-instances', (event) => {
+        return getTwitchInstances();
+    });
 
     // Création du menu
     const template = [
