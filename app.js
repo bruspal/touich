@@ -30,6 +30,27 @@ function createTwitchWindow() {
     newRender.loadURL('https://www.twitch.tv/')
     appWindow.webContents.send('refresh', getTwitchInstances())
 
+    // When page is loaded update the main window
+/*
+    newRender.webContents.on('did-finish-load', () => {
+        newRender.webContents.openDevTools()
+        newRender.webContents.executeJavaScript(`
+            let __streamTitle = document.querySelector('[data-a-target="stream-title"]')
+            if (__streamTitle) {
+                return __streamTitle.innerText
+            } else {
+                return 'No title'
+            }
+        `)
+        .then(streamTitle => {
+            console.log(streamTitle);
+            // appWindow.webContents.send('send-title', [newRender.id, streamTitle])
+        })
+        .catch( err => console.log(err))
+    })
+*/
+
+    // On close remove the instance from the array
     newRender.on('closed', () => {
         delete twitchInstances[newRender.id]
         appWindow.webContents.send('refresh', getTwitchInstances())
@@ -44,6 +65,7 @@ function createTwitchWindow() {
  * @returns {Object[]} - An array of objects representing the Twitch instances. Each object contains the following properties:
  *  - id: The ID of the instance as a number.
  *  - name: The title of the instance as a string.
+ *  - muted: Whether the instance is muted or not as a boolean.
  */
 function getTwitchInstances() {
     let t = []
@@ -51,7 +73,8 @@ function getTwitchInstances() {
     twitchInstances.forEach((ins, idx) => {
         t.push({
             id: idx,
-            name: ins.getTitle()
+            name: ins.getTitle(),
+            muted: isMutted(ins)
         })
     })
     return t
@@ -119,19 +142,35 @@ app.whenReady().then(() => {
     /*
      * IPCs
      */
+    // Ask for a new Twitch window (from preload.js)
     ipcMain.on('create-twitch-window', (event, arg) => {
         createTwitchWindow();
     });
 
+    // Call for a refresh of the stream list (from twitchPreload.js)
     ipcMain.on('call-refresh', () => {
-        // for(ins in twitchInstances) {
-        //     ins.setTitle(ins.getTitle())
-        // }
         appWindow.webContents.send('refresh', getTwitchInstances())
     })
 
+    // Get the list of Twitch instances (from preload.js)
     ipcMain.handle('get-list-instances', (event) => {
         return getTwitchInstances();
+    });
+
+    // Give focus to a Twitch window (from preload.js)
+    ipcMain.on('focus-twitch-window', (event, arg) => {
+        twitchInstances[arg].focus();
+    });
+
+    // Close a Twitch window (from preload.js)
+    ipcMain.on('close-twitch-window', (event, arg) => {
+        twitchInstances[arg].close();
+    });
+
+    // Mute / Unmute a Twitch window (from preload.js)
+    ipcMain.on('mute-unmute-twitch-window', (event, arg) => {
+        muteUnmute(twitchInstances[arg])
+        appWindow.webContents.send('refresh', getTwitchInstances())
     });
 
     // Création du menu
