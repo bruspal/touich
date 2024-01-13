@@ -29,6 +29,8 @@ function createTwitchWindow() {
     twitchInstances[newRender.id] = newRender;   // Store the id instance
     newRender.loadURL('https://www.twitch.tv/')
     appWindow.webContents.send('refresh', getTwitchInstances())
+    // Give focus back to the main window
+    appWindow.focus()
 
     // When page is loaded update the main window
 /*
@@ -101,6 +103,12 @@ function createAppWindow() {
             appWindow = null;
         });
     }
+
+    appWindow.on('closed', () => {
+        // finish application if not on macOS
+        app.quit()
+    });
+
 }
 
 /**
@@ -222,8 +230,25 @@ app.whenReady().then(() => {
     })
 })
 
+
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {
     // On macOS it is common for applications and their menu bar to stay active until the user quits explicitly with Cmd + Q
     if (process.platform !== 'darwin') app.quit()
 })
+
+// Wain main window is closed, close all renderer then quit the app
+app.on('before-quit', (event) => {
+    event.preventDefault(); // Prevents the app from quitting
+    let promises = [];
+    for (let ins of twitchInstances) {
+        promises.push(new Promise((resolve) => {
+            ins.once('closed', resolve); // Resolve when the 'closed' event is emitted
+            ins.close();
+        }));
+    }
+
+    Promise.all(promises).then(() => {
+        if (process.platform !== 'darwin') app.quit()
+    });
+});
