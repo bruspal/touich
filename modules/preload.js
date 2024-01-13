@@ -33,7 +33,7 @@ function createInstanceUI(ins) {
     outer.classList.add('instance')
 
     let streamer = document.createElement('h2')
-    streamer.textContent = ins.name
+    streamer.textContent = ins.name.replace(/\(.*?\)|- Twitch/g, "").trim()
     streamer.classList.add('streamer')
 
     let streamTitle = document.createElement('div')
@@ -42,27 +42,28 @@ function createInstanceUI(ins) {
 
     let focusButton = document.createElement('button')
     focusButton.setAttribute('data-id', ins.id)
-    focusButton.classList.add('instance-button')
+    focusButton.classList.add('btn', 'btn-primary', 'instance-button')
     focusButton.onclick = () => ipcRenderer.send('focus-twitch-window', ins.id)
     focusButton.textContent = 'Show'
     focusButton.id = 'show-'+ins.id
 
     let muteUnmuteButton = document.createElement('button')
     muteUnmuteButton.setAttribute('data-id', ins.id)
-    muteUnmuteButton.classList.add('instance-button')
     muteUnmuteButton.onclick = () => ipcRenderer.send('mute-unmute-twitch-window', ins.id)
     if (ins.muted) {
         muteUnmuteButton.classList.add('muted')
         muteUnmuteButton.textContent = 'Unmute'
+        muteUnmuteButton.classList.add('btn', 'btn-warning', 'instance-button')
     } else {
         muteUnmuteButton.classList.remove('muted')
         muteUnmuteButton.textContent = 'Mute'
+        muteUnmuteButton.classList.add('btn', 'btn-primary', 'instance-button')
     }
     muteUnmuteButton.id = 'mute-unmute-'+ins.id
 
     let closeButton = document.createElement('button')
     closeButton.setAttribute('data-id', ins.id)
-    closeButton.classList.add('instance-button')
+    closeButton.classList.add('btn', 'btn-danger', 'instance-button')
     closeButton.onclick = () => ipcRenderer.send('close-twitch-window', ins.id)
     closeButton.textContent = 'Close'
     closeButton.id = 'close-'+ins.id
