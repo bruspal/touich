@@ -1,5 +1,10 @@
 const {ipcRenderer, contextBridge} = require('electron');
 
+/**
+ * Creates a button for each instance and appends it to the button container.
+ *
+ * @param {Array} instances - The array of instances.
+ */
 function createButtonForEachInstance(instances) {
     // get the button container
     const buttonContainer= document.getElementById('buttonContainer')
@@ -14,10 +19,23 @@ function createButtonForEachInstance(instances) {
     });
 }
 
+/*
+ * ContextBridge
+ */
 contextBridge.exposeInMainWorld(
     "eapi",
     {
+        /**
+         * Creates a Twitch window.
+         *
+         * @returns {void}
+         */
         createTwitchWindow: () => ipcRenderer.send('create-twitch-window'),
+        /**
+         * Refreshes the list of instances by invoking a function from the ipcRenderer module.
+         *
+         * @returns {void}
+         */
         refreshInstances: () => {
             ipcRenderer.invoke('get-list-instances')
                 .then((instances) => {
@@ -31,5 +49,9 @@ contextBridge.exposeInMainWorld(
     }
 );
 
-
-
+/*
+ * IPCs
+ */
+ipcRenderer.on('refresh', (ev, instances) =>{
+    createButtonForEachInstance(instances)
+})

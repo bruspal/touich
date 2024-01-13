@@ -6,8 +6,8 @@ let twitchInstances = []; // Array to store all instances of twitch renderers
 
 /**
  * Creates a new Twitch window.
- * @function createTwitchWindow
- * @returns {void}
+ *
+ * @return {void}
  */
 function createTwitchWindow() {
     let newRender;
@@ -22,17 +22,28 @@ function createTwitchWindow() {
             sandbox: true,                      // set sandboxing to true, useless in this context since app.enableSandbox() is called later. This is just for educational purpose.
             worldSafeExecuteJavaScript: true,   // prevent unsafe JS evaluation on unsecure context
             enableRemoteModule: false,          // Disable remote module
+            preload: path.join(__dirname, 'modules/twitchPreload.js')
         },
     }
     newRender = new BrowserWindow(BrowserWindowOptions)
     twitchInstances[newRender.id] = newRender;   // Store the id instance
     newRender.loadURL('https://www.twitch.tv/')
+    appWindow.webContents.send('refresh', getTwitchInstances())
+
+    newRender.on('closed', () => {
+        delete twitchInstances[newRender.id]
+        appWindow.webContents.send('refresh', getTwitchInstances())
+        newRender = null;
+    });
+
 }
 
 /**
- * Function to get all twitch instances
- * @function getTwitchInstances
- * @returns {string[]}
+ * Retrieves Twitch instances and returns an array of objects containing their IDs and names.
+ *
+ * @returns {Object[]} - An array of objects representing the Twitch instances. Each object contains the following properties:
+ *  - id: The ID of the instance as a number.
+ *  - name: The title of the instance as a string.
  */
 function getTwitchInstances() {
     let t = []
@@ -47,8 +58,7 @@ function getTwitchInstances() {
 }
 
 /**
- * Creates a new App window.
- * @function createAppWindow
+ * Creates the main application window if it does not exist, and focuses it if it does.
  * @returns {void}
  */
 function createAppWindow() {
@@ -70,6 +80,12 @@ function createAppWindow() {
     }
 }
 
+/**
+ * Toggles the audio muted state of a window and updates the window title accordingly.
+ *
+ * @param {Electron.BrowserWindow} windowInstance - The window to mute/unmute.
+ * @return {boolean} - The previous muted state of the window.
+ */
 function muteUnmute(windowInstance) {
     // Toggle the muted state
     const mutedState = isMutted(windowInstance)
@@ -81,8 +97,15 @@ function muteUnmute(windowInstance) {
     } else {
         windowInstance.setTitle(windowInstance.getTitle().replace(' (muted)', ''))
     }
+    return mutedState
 }
 
+/**
+ * Determines if the audio is muted in the given window instance.
+ *
+ * @param {Electron.BrowserWindow} windowInstance - The window instance to check.
+ * @returns {boolean} - True if the audio is muted, false otherwise.
+ */
 function isMutted(windowInstance) {
     return windowInstance.webContents.isAudioMuted();
 }
@@ -91,12 +114,21 @@ function isMutted(windowInstance) {
 
 // Enable sandboxing application wise
 app.enableSandbox()
-
 // Create the main window when electron is ready
 app.whenReady().then(() => {
+    /*
+     * IPCs
+     */
     ipcMain.on('create-twitch-window', (event, arg) => {
         createTwitchWindow();
     });
+
+    ipcMain.on('call-refresh', () => {
+        // for(ins in twitchInstances) {
+        //     ins.setTitle(ins.getTitle())
+        // }
+        appWindow.webContents.send('refresh', getTwitchInstances())
+    })
 
     ipcMain.handle('get-list-instances', (event) => {
         return getTwitchInstances();
