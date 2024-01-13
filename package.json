@@ -1,6 +1,6 @@
 {
   "name": "twitchClient",
-  "version": "1.0.0",
+  "version": "1.1.0-alpha-1",
   "author": "Bruspal",
   "license": "GPL v3.0",
   "main": "app.js",
@@ -21,7 +21,8 @@
     "files": [
       "app.js",
       "package.json",
-      "./assets/**/*"
+      "./assets/**/*",
+      "./modules/*"
     ],
     "win": {
       "target": "nsis"
