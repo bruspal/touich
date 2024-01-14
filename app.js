@@ -11,7 +11,7 @@ let twitchInstances = []; // Array to store all instances of twitch renderers
  */
 function createTwitchWindow() {
     let newRender;
-    const iconPath = __dirname + '/assets/logo/twitch.png';
+    const iconPath = __dirname + '/assets/logo/touich.png';
     const BrowserWindowOptions = {
         width: 1600,
         height: 900,
@@ -88,11 +88,16 @@ function getTwitchInstances() {
  */
 function createAppWindow() {
     if (appWindow) {
+        if(appWindow.isMinimized()){
+            appWindow.restore();
+        }
         appWindow.focus();
     } else {
+        const iconPath = __dirname + '/assets/logo/touich.png';
         appWindow = new BrowserWindow({
             width: 600,
             height: 900,
+            icon: iconPath,
             webPreferences: {
                 nodeIntegration: true,
                 preload: path.join(__dirname, 'modules/preload.js')
@@ -141,10 +146,21 @@ function isMutted(windowInstance) {
     return windowInstance.webContents.isAudioMuted();
 }
 
-
+/**
+ * Focuses the provided window instance.
+ *
+ * @param {Window} windowInstance - The window instance to be focused.
+ */
+function focusWindow(windowInstance) {
+    if(windowInstance.isMinimized()){
+        windowInstance.restore();
+    }
+    windowInstance.focus();
+}
 
 // Enable sandboxing application wise
 app.enableSandbox()
+
 // Create the main window when electron is ready
 app.whenReady().then(() => {
     /*
@@ -167,7 +183,7 @@ app.whenReady().then(() => {
 
     // Give focus to a Twitch window (from preload.js)
     ipcMain.on('focus-twitch-window', (event, arg) => {
-        twitchInstances[arg].focus();
+        focusWindow(twitchInstances[arg])
     });
 
     // Close a Twitch window (from preload.js)
@@ -221,12 +237,30 @@ app.whenReady().then(() => {
     const menu = Menu.buildFromTemplate(template)
     Menu.setApplicationMenu(menu)
 
+// Single instance
+    /*
+    const gotTheLock = app.requestSingleInstanceLock()
+    if ( ! gotTheLock) {
+        // if(appWindow.isMinimized()){
+        //     appWindow.restore();
+        // }
+        // appWindow.focus();
+        app.quit()
+    } else {
 
-
+        app.on('second-instance', (event, commandLine, workingDirectory) => {
+            // Someone tried to run a second instance, we should focus our window.
+            if (appWindow.isMinimized()) {
+                appWindow.restore();
+            }
+            appWindow.focus();
+        })
+    }
+    */
     createAppWindow()
     // If application is running but no window is open create a new instance of the main window.
     app.on('activate', function () {
-        if (mainWindow === null) createAppWindow()
+        if (appWindow === null) createAppWindow()
     })
 })
 
@@ -237,7 +271,8 @@ app.on('window-all-closed', function () {
     if (process.platform !== 'darwin') app.quit()
 })
 
-// Wain main window is closed, close all renderer then quit the app
+// When main window is closed, close all renderer then quit the app
+/*
 app.on('before-quit', (event) => {
     event.preventDefault(); // Prevents the app from quitting
     let promises = [];
@@ -250,5 +285,6 @@ app.on('before-quit', (event) => {
 
     Promise.all(promises).then(() => {
         if (process.platform !== 'darwin') app.quit()
-    });
-});
+    })
+})
+*/
