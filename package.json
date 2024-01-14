@@ -1,6 +1,6 @@
 {
   "name": "twitchClient",
-  "version": "1.1.0-alpha-1",
+  "version": "1.1.0-alpha-2",
   "author": "Bruspal",
   "license": "GPL v3.0",
   "main": "app.js",
@@ -32,7 +32,7 @@
     },
     "linux": {
       "target": "AppImage",
-      "icon": "assets/logo/twitch.png"
+      "icon": "assets/logo/touich.png"
     }
   }
 }
