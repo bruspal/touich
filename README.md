@@ -1,10 +1,7 @@
-# Touitch v1.0
+# Touich
 
-Simple electron embedding of twitch
+An application to manage multi-viewing of twitch streams.
 
 # Usage
 
-Simple through file menu :
-* **new windows** : for a new windows, 
-* **mute/unmute** : To mute/unmute the window
 
