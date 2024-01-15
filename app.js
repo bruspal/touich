@@ -114,11 +114,19 @@ function createAppWindow() {
         });
     }
 
-    appWindow.on('closed', () => {
-        // finish application if not on macOS
-        app.quit()
+    appWindow.webContents.on('did-finish-load', () => {
+        // After launching the app, create the first Twitch window
+        createTwitchWindow()
     });
+    // When the main window is closed, finish the application if not on macOS
+    appWindow.on('closed', () => {
+        quiteMainApp()
+    });
+}
 
+function quiteMainApp() {
+    // finish application if not on macOS
+    if (process.platform !== 'darwin') app.quit()
 }
 
 /**
@@ -179,9 +187,11 @@ function createTray() {
     tray.on('click', () => {
         if (appWindow) {
             if(appWindow.isMinimized()){
-                appWindow.restore();
+                appWindow.restore()
+                appWindow.focus()
+            } else {
+                appWindow.minimize()
             }
-            appWindow.focus();
         } else {
             createAppWindow()
         }
@@ -282,7 +292,7 @@ app.whenReady().then(() => {
     const gotTheLock = app.requestSingleInstanceLock()
     if ( ! gotTheLock) {
         // If application is already running, quit this instance
-        app.quit()
+        quiteMainApp()
     } else {
         // Create the main window if it does not exist
         createAppWindow()
@@ -305,7 +315,7 @@ app.whenReady().then(() => {
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {
     // On macOS it is common for applications and their menu bar to stay active until the user quits explicitly with Cmd + Q
-    if (process.platform !== 'darwin') app.quit()
+    quiteMainApp()
 })
 
 // When main window is closed, close all renderer then quit the app
@@ -321,7 +331,7 @@ app.on('before-quit', (event) => {
     }
 
     Promise.all(promises).then(() => {
-        if (process.platform !== 'darwin') app.quit()
+        quiteMainApp()
     })
 })
 */
