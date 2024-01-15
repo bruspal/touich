@@ -2,7 +2,9 @@
 - [ ] : refactoring modules to manage menu
 - [ ] : refactoring modules to manage twitchRenderers
 - [ ] : solo button to mute all other instances and unmute the one clicked
-- [ ] : add a button to focus a stream -> bring back the clicked instance to the foregroung en 'solo' it
+- [ ] : add a button to focus a stream -> bring back the clicked instance to the foregroung and 'solo' it
 - [ ] : Add stream title to the interface
 - [ ] : design the interface
+- [ ] : Add a panic button to hide all windows
+- [x] : Add a tray icon to show main window easily
 - [ ] : ...
