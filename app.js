@@ -279,30 +279,26 @@ app.whenReady().then(() => {
     createTray()
 
 // Single instance
-    /*
     const gotTheLock = app.requestSingleInstanceLock()
     if ( ! gotTheLock) {
-        // if(appWindow.isMinimized()){
-        //     appWindow.restore();
-        // }
-        // appWindow.focus();
+        // If application is already running, quit this instance
         app.quit()
     } else {
-
+        // Create the main window if it does not exist
+        createAppWindow()
+        // If application is running but no window is open create a new instance of the main window.
+        app.on('activate', function () {
+            if (appWindow === null) createAppWindow()
+        })
+        // If application is running and a second instance is launched, bring the main window to the front
         app.on('second-instance', (event, commandLine, workingDirectory) => {
-            // Someone tried to run a second instance, we should focus our window.
+            // bring the main window to the front
             if (appWindow.isMinimized()) {
                 appWindow.restore();
             }
             appWindow.focus();
         })
     }
-    */
-    createAppWindow()
-    // If application is running but no window is open create a new instance of the main window.
-    app.on('activate', function () {
-        if (appWindow === null) createAppWindow()
-    })
 })
 
 
