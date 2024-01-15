@@ -1,8 +1,13 @@
-const { app, BrowserWindow, Menu, ipcMain } = require('electron')
+const { app, BrowserWindow, Menu, ipcMain, Tray } = require('electron')
 const path = require('path'); // Import path module
 
-let appWindow;
+let appWindow = null
+let tray = null
 let twitchInstances = []; // Array to store all instances of twitch renderers
+
+/*
+ * Twitch Part
+ */
 
 /**
  * Creates a new Twitch window.
@@ -158,6 +163,35 @@ function focusWindow(windowInstance) {
     windowInstance.focus();
 }
 
+/*
+ * Tray Part
+ */
+
+/**
+ * Creates a system tray icon with a click event listener that either restores the main window if it is minimized and brings it into focus, or creates the main window if it does not
+ * exist yet.
+ *
+ * @return {void} This method does not return anything.
+ */
+function createTray() {
+    tray = new Tray(__dirname + '/assets/logo/touich.png')
+    tray.setToolTip('Click to show main window')
+    tray.on('click', () => {
+        if (appWindow) {
+            if(appWindow.isMinimized()){
+                appWindow.restore();
+            }
+            appWindow.focus();
+        } else {
+            createAppWindow()
+        }
+    })
+}
+
+/*
+ * App Part
+ */
+
 // Enable sandboxing application wise
 app.enableSandbox()
 
@@ -197,7 +231,9 @@ app.whenReady().then(() => {
         appWindow.webContents.send('refresh', getTwitchInstances())
     });
 
-    // Création du menu
+    /*
+     * Create Menu
+     */
     const template = [
         {
             label: 'File',
@@ -236,6 +272,11 @@ app.whenReady().then(() => {
     ]
     const menu = Menu.buildFromTemplate(template)
     Menu.setApplicationMenu(menu)
+
+    /*
+     * Create Tray
+     */
+    createTray()
 
 // Single instance
     /*
